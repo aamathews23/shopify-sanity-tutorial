@@ -1,4 +1,5 @@
 import {createHydrogenContext} from '@shopify/hydrogen';
+import {createSanityContext, type SanityContext} from 'hydrogen-sanity';
 import {AppSession} from '~/lib/session';
 import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
 
@@ -15,7 +16,9 @@ const additionalContext = {
 type AdditionalContextType = typeof additionalContext;
 
 declare global {
-  interface HydrogenAdditionalContext extends AdditionalContextType {}
+  interface HydrogenAdditionalContext extends AdditionalContextType {
+    sanity: SanityContext;
+  }
 }
 
 /**
@@ -40,6 +43,22 @@ export async function createHydrogenRouterContext(
     AppSession.init(request, [env.SESSION_SECRET]),
   ]);
 
+  const sanity = await createSanityContext({
+    request,
+
+    // To use the Hydrogen cache for queries
+    cache,
+    waitUntil,
+
+    // Sanity client configuration
+    client: {
+      projectId: env.SANITY_PROJECT_ID,
+      dataset: env.SANITY_DATASET || 'production',
+      apiVersion: env.SANITY_API_VERSION || 'v2025-11-01',
+      useCdn: process.env.NODE_ENV === 'production',
+    },
+  });
+
   const hydrogenContext = createHydrogenContext(
     {
       env,
@@ -53,7 +72,7 @@ export async function createHydrogenRouterContext(
         queryFragment: CART_QUERY_FRAGMENT,
       },
     },
-    additionalContext,
+    {...additionalContext, sanity},
   );
 
   return hydrogenContext;
