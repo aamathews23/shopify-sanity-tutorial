@@ -17,6 +17,9 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
+import {usePreviewMode} from 'hydrogen-sanity/preview';
+import {VisualEditing} from 'hydrogen-sanity/visual-editing';
+import {Sanity} from 'hydrogen-sanity';
 
 export type RootLoader = typeof loader;
 
@@ -144,6 +147,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
+  const previewMode = usePreviewMode();
 
   return (
     <html lang="en">
@@ -158,6 +162,8 @@ export function Layout({children}: {children?: React.ReactNode}) {
       </head>
       <body>
         {children}
+        {previewMode ? <VisualEditing action="/api/preview" /> : null}
+        <Sanity nonce={nonce} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

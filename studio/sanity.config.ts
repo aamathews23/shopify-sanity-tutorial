@@ -11,6 +11,9 @@ import {media, mediaAssetSource} from 'sanity-plugin-media'
 import {customDocumentActions} from './plugins/customDocumentActions'
 import Navbar from './components/studio/Navbar'
 
+import { presentationTool } from "sanity/presentation";
+import { locations } from "./presentations/locations";
+
 const devOnlyPlugins = [visionTool()]
 
 export default defineConfig({
@@ -27,6 +30,16 @@ export default defineConfig({
     customDocumentActions(),
     media(),
     ...(isDev ? devOnlyPlugins : []),
+    presentationTool({
+      resolve: {locations},
+      previewUrl: {
+        origin: "http://localhost:3000",
+        preview: "/",
+        previewMode: {
+          enable: "/api/preview",
+        },
+      },
+    }),
   ],
 
   schema: {
